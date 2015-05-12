@@ -41,6 +41,7 @@ def MainMenu():
 
 	oc = ObjectContainer()
 	page_data = HTML.ElementFromURL(BASE_URL)
+	oc.add(InputDirectoryObject(key = Callback(Search), title='Search', summary='Search XMovies8', prompt='Search for...'))
 	
 	for each in page_data.xpath("//li[contains(@class,'cat-item')]"):
 		url = each.xpath("./a/@href")[0]
@@ -132,5 +133,35 @@ def EpisodeDetail(title, url):
 		summary = description
 		)
 	)	
+
+	return oc
+
+####################################################################################################
+@route(PREFIX + "/search")
+def Search(query):
+
+	oc = ObjectContainer(title2='Search Results')
+	data = HTTP.Request(BASE_URL + '/?s=%s' % String.Quote(query, usePlus=True), headers="").content
+
+	html = HTML.ElementFromString(data)
+
+	for movie in html.xpath("//div[@class='post-panel']"):
+		url = movie.xpath("./div/a/@href")[0]
+		title = movie.xpath("./div[@class='inner']/h2/a/text()")[0]
+		thumb = movie.xpath("./div[@class='post-thumbnail']/a/img/@src")[0]
+		if "Season" in title:
+			oc.add(DirectoryObject(
+				key = Callback(ShowEpisodes, title = title, url = url),
+				title = title,
+				thumb = Resource.ContentsOfURLWithFallback(url = thumb, fallback='icon-series.png')
+				)
+			)
+		else:
+			oc.add(DirectoryObject(
+				key = Callback(EpisodeDetail, title = title, url = url),
+				title = title,
+				thumb = BASE_URL + thumb
+				)
+			)
 
 	return oc
