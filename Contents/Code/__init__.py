@@ -1,6 +1,6 @@
 ######################################################################################
 #
-#	Afdah.tv - v0.01
+#	XMovies8.tv - v0.01
 #
 ######################################################################################
 
@@ -47,12 +47,13 @@ def MainMenu():
 		url = each.xpath("./a/@href")[0]
 		title = each.xpath("./a/text()")[0]
 
-		oc.add(DirectoryObject(
-			key = Callback(ShowCategory, title = title, category = title, page_count=1),
-			title = title,
-			thumb = R(ICON_MOVIES)
+		if title != "Animation":
+			oc.add(DirectoryObject(
+				key = Callback(ShowCategory, title = title, category = title, page_count=1),
+				title = title,
+				thumb = R(ICON_MOVIES)
+				)
 			)
-		)
 	return oc
 
 ######################################################################################
@@ -60,6 +61,7 @@ def MainMenu():
 def ShowCategory(title, category, page_count):
 
 	oc = ObjectContainer(title1 = title)
+	oc.add(InputDirectoryObject(key = Callback(Search), title='Search', summary='Search XMovies8', prompt='Search for...'))
 	page_data = HTML.ElementFromURL(BASE_URL + '/movie-genre/' + str(category) + '/page/' + str(page_count))
 	
 	for each in page_data.xpath("//div[@class='article-image']"):
@@ -98,6 +100,7 @@ def ShowCategory(title, category, page_count):
 def ShowEpisodes(title, url):
 
 	oc = ObjectContainer(title1 = title)
+	oc.add(InputDirectoryObject(key = Callback(Search), title='Search', summary='Search XMovies8', prompt='Search for...'))
 	page_data = HTML.ElementFromURL(url)
 	thumb = page_data.xpath("//div[@class='article-image']/img/@src")[0]
 	maintitle = page_data.xpath("//meta[@property='og:title']/@content")[0].replace('Xmovies8: ','',1).replace(' full movie Putlocker HD','',1).strip()
@@ -118,6 +121,7 @@ def ShowEpisodes(title, url):
 def EpisodeDetail(title, url):
 	
 	oc = ObjectContainer(title1 = title)
+	oc.add(InputDirectoryObject(key = Callback(Search), title='Search', summary='Search XMovies8', prompt='Search for...'))
 	page_data = HTML.ElementFromURL(url)
 	title = page_data.xpath("//meta[@property='og:title']/@content")[0].replace('Xmovies8: ','',1).replace(' full movie Putlocker HD','',1).strip()
 	try:
