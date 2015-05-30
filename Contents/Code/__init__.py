@@ -30,8 +30,10 @@ def Start():
 	VideoClipObject.thumb = R(ICON_MOVIES)
 	VideoClipObject.art = R(ART)
 	
-	HTTP.Headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:33.0) Gecko/20100101 Firefox/33.0'
-	HTTP.Headers['Referer'] = 'xmovies8.co'
+	HTTP.Headers['User-Agent'] = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.63 Safari/537.36"
+	HTTP.Headers['Referer'] = "xmovies8.co"
+	HTTP.Headers['Accept'] = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+	HTTP.Headers['Cookie'] = "location.href=1"
 	
 ######################################################################################
 # Menu hierarchy
@@ -55,6 +57,7 @@ def MainMenu():
 				)
 			)
 	return oc
+
 
 ######################################################################################
 @route(PREFIX + "/showcategory")	
