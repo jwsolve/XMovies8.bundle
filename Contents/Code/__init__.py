@@ -64,6 +64,7 @@ def MainMenu():
 def ShowCategory(title, category, page_count):
 
 	oc = ObjectContainer(title1 = title)
+	thistitle = title
 	oc.add(InputDirectoryObject(key = Callback(Search), title='Search', summary='Search XMovies8', prompt='Search for...'))
 	page_data = HTML.ElementFromURL(BASE_URL + '/movie-genre/' + str(category) + '/page/' + str(page_count))
 	
@@ -88,7 +89,7 @@ def ShowCategory(title, category, page_count):
 			)
 
 	oc.add(NextPageObject(
-		key = Callback(ShowCategory, title = category, category = category, page_count = int(page_count) + 1),
+		key = Callback(ShowCategory, title = thistitle, category = category, page_count = int(page_count) + 1),
 		title = "More...",
 		thumb = R(ICON_NEXT)
 			)
