@@ -51,10 +51,10 @@ def MediaObjectsForURL(url):
 	]
 
 ########################################################################################
-@indirect
 def PlayVideo(url, res):
 
 	page = HTML.ElementFromURL(url)
 	video_url = page.xpath("//div[@class='movie-download']/b/span/a/@href")[0]
-	return IndirectResponse(VideoClipObject, key=video_url)
+	return Redirect(video_url)
+
 	
