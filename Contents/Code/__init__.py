@@ -18,6 +18,20 @@ ICON_QUEUE = "icon-queue.png"
 BASE_URL = "http://xmovies8.co"
 MOVIES_URL = "http://xmovies8.co"
 
+import os
+import sys
+from lxml import html
+
+try:
+	path = os.getcwd().split("?\\")[1].split('Plug-in Support')[0]+"Plug-ins/XMovies8.bundle/Contents/Code/Modules/XMovies8"
+except:
+	path = os.getcwd().split("Plug-in Support")[0]+"Plug-ins/XMovies8.bundle/Contents/Code/Modules/XMovies8"
+if path not in sys.path:
+	sys.path.append(path)
+
+import cfscrape
+scraper = cfscrape.create_scraper()
+
 ######################################################################################
 # Set global variables
 
@@ -42,7 +56,8 @@ def Start():
 def MainMenu():
 
 	oc = ObjectContainer()
-	page_data = HTML.ElementFromURL(BASE_URL)
+	page = scraper.get(BASE_URL)
+	page_data = html.fromstring(page.text)
 	oc.add(InputDirectoryObject(key = Callback(Search), title='Search', summary='Search XMovies8', prompt='Search for...'))
 	
 	for each in page_data.xpath("//li[contains(@class,'cat-item')]"):
@@ -66,7 +81,8 @@ def ShowCategory(title, category, page_count):
 	oc = ObjectContainer(title1 = title)
 	thistitle = title
 	oc.add(InputDirectoryObject(key = Callback(Search), title='Search', summary='Search XMovies8', prompt='Search for...'))
-	page_data = HTML.ElementFromURL(BASE_URL + '/movie-genre/' + str(category) + '/page/' + str(page_count))
+	page = scraper.get(BASE_URL + '/movie-genre/' + str(category) + '/page/' + str(page_count))
+	page_data = html.fromstring(page.text)
 	
 	for each in page_data.xpath("//div[@class='article-image']"):
 		url = each.xpath("./a/@href")[0]
@@ -105,7 +121,8 @@ def ShowEpisodes(title, url):
 
 	oc = ObjectContainer(title1 = title)
 	oc.add(InputDirectoryObject(key = Callback(Search), title='Search', summary='Search XMovies8', prompt='Search for...'))
-	page_data = HTML.ElementFromURL(url)
+	page = scraper.get(url)
+	page_data = html.fromstring(page.text)
 	thumb = page_data.xpath("//div[@class='article-image']/img/@src")[0]
 	maintitle = page_data.xpath("//meta[@property='og:title']/@content")[0].replace('Xmovies8: ','',1).replace(' full movie Putlocker HD','',1).strip()
 	for each in page_data.xpath("//ul[@class='movie-parts']/li"):
@@ -126,7 +143,9 @@ def EpisodeDetail(title, url):
 	
 	oc = ObjectContainer(title1 = title)
 	oc.add(InputDirectoryObject(key = Callback(Search), title='Search', summary='Search XMovies8', prompt='Search for...'))
-	page_data = HTML.ElementFromURL(url)
+	page = scraper.get(url)
+	page_data = html.fromstring(page.text)
+
 	title = page_data.xpath("//meta[@property='og:title']/@content")[0].replace('Xmovies8: ','',1).replace(' full movie Putlocker HD','',1).strip()
 	try:
 		description = page_data.xpath("//span[@class='metaContent'][3]/text()")[0]

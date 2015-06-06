@@ -8,6 +8,20 @@ HTTP_HEADERS = {
 }
 HTTP.Headers['Cookie'] = "location.href=1"
 
+import os
+import sys
+from lxml import html
+
+try:
+	path = os.getcwd().split("?\\")[1].split('Plug-in Support')[0]+"Plug-ins/XMovies8.bundle/Contents/Code/Modules/XMovies8"
+except:
+	path = os.getcwd().split("Plug-in Support")[0]+"Plug-ins/XMovies8.bundle/Contents/Code/Modules/XMovies8"
+if path not in sys.path:
+	sys.path.append(path)
+
+import cfscrape
+scraper = cfscrape.create_scraper()
+
 
 ########################################################################################
 def NormalizeURL(url):
@@ -18,7 +32,8 @@ def NormalizeURL(url):
 ########################################################################################
 def MetadataObjectForURL(url):
 
-	page_data = HTML.ElementFromURL(url)
+	page = scraper.get(url)
+	page_data = html.fromstring(page.text)
 	title = page_data.xpath("//meta[@property='og:title']/@content")[0].replace('Xmovies8: ','',1).replace(' full movie Putlocker HD','',1).strip()
 	try:
 		description = page_data.xpath("//span[@class='metaContent'][3]/text()")[0]
@@ -53,8 +68,7 @@ def MediaObjectsForURL(url):
 ########################################################################################
 def PlayVideo(url, res):
 
-	page = HTML.ElementFromURL(url)
+	page_data = scraper.get(url)
+	page = html.fromstring(page_data.text)
 	video_url = page.xpath("//div[@class='movie-download']/b/span/a/@href")[0]
 	return Redirect(video_url)
-
-	
