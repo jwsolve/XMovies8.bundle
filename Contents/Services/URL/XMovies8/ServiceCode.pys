@@ -70,5 +70,8 @@ def PlayVideo(url, res):
 
 	page_data = scraper.get(url)
 	page = html.fromstring(page_data.text)
-	video_url = page.xpath("//div[@class='movie-download']/b/span/a/@href")[0]
+	try:
+		video_url = page.xpath("//div[@id='download-movie']/b/span/a/@href")[0]
+	except:
+		video_url = page.xpath("//div[@id='download-movie']/strong/span/a/@href")[0]
 	return Redirect(video_url)
