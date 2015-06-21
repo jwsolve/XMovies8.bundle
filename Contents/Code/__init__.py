@@ -21,6 +21,8 @@ MOVIES_URL = "http://xmovies8.co"
 import os
 import sys
 from lxml import html
+import updater
+updater.init(repo = 'jwsolve/xmovies8.bundle', branch = 'master')
 
 try:
 	path = os.getcwd().split("?\\")[1].split('Plug-in Support')[0]+"Plug-ins/XMovies8.bundle/Contents/Code/Modules/XMovies8"
@@ -58,6 +60,7 @@ def MainMenu():
 	oc = ObjectContainer()
 	page = scraper.get(BASE_URL)
 	page_data = html.fromstring(page.text)
+	updater.add_button_to(oc, PerformUpdate)
 	oc.add(InputDirectoryObject(key = Callback(Search), title='Search', summary='Search XMovies8', prompt='Search for...'))
 	
 	for each in page_data.xpath("//li[contains(@class,'cat-item')]"):
@@ -73,6 +76,10 @@ def MainMenu():
 			)
 	return oc
 
+######################################################################################
+@route(PREFIX + "/performupdate")
+def PerformUpdate():
+	return updater.PerformUpdate()
 
 ######################################################################################
 @route(PREFIX + "/showcategory")	
@@ -168,11 +175,11 @@ def EpisodeDetail(title, url):
 def Search(query):
 
 	oc = ObjectContainer(title2='Search Results')
-	data = HTTP.Request(BASE_URL + '/?s=%s' % String.Quote(query, usePlus=True), headers="").content
+	searchdata = scraper.get(BASE_URL + '/?s=%s' % String.Quote(query, usePlus=True))
 
-	html = HTML.ElementFromString(data)
+	pagehtml = html.fromstring(searchdata.text)
 
-	for movie in html.xpath("//div[@class='post-panel']"):
+	for movie in pagehtml.xpath("//div[@class='post-panel']"):
 		url = movie.xpath("./div/a/@href")[0]
 		title = movie.xpath("./div[@class='inner']/h2/a/text()")[0]
 		thumb = movie.xpath("./div[@class='post-thumbnail']/a/img/@src")[0]
