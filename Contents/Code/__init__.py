@@ -49,7 +49,6 @@ def Start():
 	HTTP.Headers['User-Agent'] = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.63 Safari/537.36"
 	HTTP.Headers['Referer'] = "xmovies8.co"
 	HTTP.Headers['Accept'] = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
-	HTTP.Headers['Cookie'] = "location.href=1"
 	
 ######################################################################################
 # Menu hierarchy
@@ -69,7 +68,7 @@ def MainMenu():
 
 		if title != "Animation":
 			oc.add(DirectoryObject(
-				key = Callback(ShowCategory, title = title, category = title, page_count=1),
+				key = Callback(ShowCategory, title = title, category = url, page_count=1),
 				title = title,
 				thumb = R(ICON_MOVIES)
 				)
@@ -87,32 +86,36 @@ def ShowCategory(title, category, page_count):
 
 	oc = ObjectContainer(title1 = title)
 	thistitle = title
+	thiscategory = category
 	oc.add(InputDirectoryObject(key = Callback(Search), title='Search', summary='Search XMovies8', prompt='Search for...'))
-	page = scraper.get(BASE_URL + '/movie-genre/' + str(category) + '/page/' + str(page_count))
+	page = scraper.get(str(category) + '/page/' + str(page_count))
 	page_data = html.fromstring(page.text)
 	
 	for each in page_data.xpath("//div[@class='article-image']"):
 		url = each.xpath("./a/@href")[0]
 		title = each.xpath("./a/@title")[0]
-		thumb = each.xpath("./a/img/@src")[0]
+		try:
+			thumb = each.xpath("./img/@src")[0]
+		except:
+			thumb = each.xpath("./a/img/@src")[0]
 
 		if "Season" in title:
 			oc.add(DirectoryObject(
 				key = Callback(ShowEpisodes, title = title, url = url),
 				title = title,
-				thumb = Resource.ContentsOfURLWithFallback(url = thumb, fallback='icon-series.png')
+				thumb = thumb
 				)
 			)
 		else:
 			oc.add(DirectoryObject(
 				key = Callback(EpisodeDetail, title = title, url = url),
 				title = title,
-				thumb = BASE_URL + thumb
+				thumb = thumb
 				)
 			)
 
 	oc.add(NextPageObject(
-		key = Callback(ShowCategory, title = thistitle, category = category, page_count = int(page_count) + 1),
+		key = Callback(ShowCategory, title = thistitle, category = thiscategory, page_count = int(page_count) + 1),
 		title = "More...",
 		thumb = R(ICON_NEXT)
 			)
@@ -158,12 +161,15 @@ def EpisodeDetail(title, url):
 		description = page_data.xpath("//span[@class='metaContent'][3]/text()")[0]
 	except:
 		description = page_data.xpath("//span[@class='metaContent'][2]/text()")[0]
-	thumb = page_data.xpath("//div[@class='article-image']/img/@src")[0]
+	try:
+		thumb = page_data.xpath("//div[@class='article-image']/a/img/@src")[0]
+	except:
+		thumb = page_data.xpath("//div[@class='article-image']/img/@src")[0]
 	
 	oc.add(VideoClipObject(
 		url = url,
 		title = title,
-		thumb = Resource.ContentsOfURLWithFallback(url = thumb, fallback='icon-cover.png'),
+		thumb = thumb,
 		summary = description
 		)
 	)	
