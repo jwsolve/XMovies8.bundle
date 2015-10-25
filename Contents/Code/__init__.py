@@ -15,13 +15,14 @@ ICON_NEXT = "icon-next.png"
 ICON_MOVIES = "icon-movies.png"
 ICON_SERIES = "icon-series.png"
 ICON_QUEUE = "icon-queue.png"
-BASE_URL = "http://xmovies8.co"
-MOVIES_URL = "http://xmovies8.co"
+BASE_URL = "http://xmovies8.so"
+MOVIES_URL = "http://xmovies8.so"
 
 import os
 import sys
 from lxml import html
 import updater
+
 updater.init(repo = 'jwsolve/xmovies8.bundle', branch = 'master')
 
 try:
@@ -47,7 +48,7 @@ def Start():
 	VideoClipObject.art = R(ART)
 	
 	HTTP.Headers['User-Agent'] = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.63 Safari/537.36"
-	HTTP.Headers['Referer'] = "xmovies8.co"
+	HTTP.Headers['Referer'] = "xmovies8.so"
 	HTTP.Headers['Accept'] = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
 	
 ######################################################################################
@@ -62,7 +63,7 @@ def MainMenu():
 	updater.add_button_to(oc, PerformUpdate)
 	oc.add(InputDirectoryObject(key = Callback(Search), title='Search', summary='Search XMovies8', prompt='Search for...'))
 	
-	for each in page_data.xpath("//li[contains(@class,'cat-item')]"):
+	for each in page_data.xpath("//ul[contains(@class,'generos')]/li"):
 		url = each.xpath("./a/@href")[0]
 		title = each.xpath("./a/text()")[0]
 
@@ -88,16 +89,13 @@ def ShowCategory(title, category, page_count):
 	thistitle = title
 	thiscategory = category
 	oc.add(InputDirectoryObject(key = Callback(Search), title='Search', summary='Search XMovies8', prompt='Search for...'))
-	page = scraper.get(str(category) + '/page/' + str(page_count))
+	page = scraper.get(str(category) + '?page=' + str(page_count))
 	page_data = html.fromstring(page.text)
 	
-	for each in page_data.xpath("//div[@class='article-image']"):
+	for each in page_data.xpath("//div[@class='imagen']"):
 		url = each.xpath("./a/@href")[0]
-		title = each.xpath("./a/@title")[0]
-		try:
-			thumb = each.xpath("./img/@src")[0]
-		except:
-			thumb = each.xpath("./a/img/@src")[0]
+		title = each.xpath("./img/@alt")[0]
+		thumb = each.xpath("./img/@src")[0]
 
 		if "Season" in title:
 			oc.add(DirectoryObject(
@@ -133,11 +131,11 @@ def ShowEpisodes(title, url):
 	oc.add(InputDirectoryObject(key = Callback(Search), title='Search', summary='Search XMovies8', prompt='Search for...'))
 	page = scraper.get(url)
 	page_data = html.fromstring(page.text)
-	thumb = page_data.xpath("//div[@class='article-image']/img/@src")[0]
-	maintitle = page_data.xpath("//meta[@property='og:title']/@content")[0].replace('Xmovies8: ','',1).replace(' full movie Putlocker HD','',1).strip()
-	for each in page_data.xpath("//ul[@class='movie-parts']/li"):
+	thumb = page_data.xpath("//div[@class='imgs']/img/@src")[0]
+	maintitle = page_data.xpath("//div[@class='dataplus']/h1/text()")[0]
+	for each in page_data.xpath("//li[@class='has-sub']/ul/li"):
 		url = each.xpath("./a/@href")[0]
-		title = maintitle + 'Episode ' + each.xpath("./a/text()")[0]
+		title = maintitle + 'Episode ' + each.xpath("./a/span[@class='datix']/text()")[0]
 		oc.add(DirectoryObject(
 			key = Callback(EpisodeDetail, title = title, url = url),
 			title = title,
@@ -156,15 +154,9 @@ def EpisodeDetail(title, url):
 	page = scraper.get(url)
 	page_data = html.fromstring(page.text)
 
-	title = page_data.xpath("//meta[@property='og:title']/@content")[0].replace('Xmovies8: ','',1).replace(' full movie Putlocker HD','',1).strip()
-	try:
-		description = page_data.xpath("//span[@class='metaContent'][3]/text()")[0]
-	except:
-		description = page_data.xpath("//span[@class='metaContent'][2]/text()")[0]
-	try:
-		thumb = page_data.xpath("//div[@class='article-image']/a/img/@src")[0]
-	except:
-		thumb = page_data.xpath("//div[@class='article-image']/img/@src")[0]
+	title = page_data.xpath("//div[@class='dataplus']/h1/text()")[0]
+	description = page_data.xpath("//div[@id='dato-2']/p/text()")[0]
+	thumb = page_data.xpath("//div[@class='imgs']/img/@src")[0]
 	
 	oc.add(VideoClipObject(
 		url = url,
@@ -185,10 +177,10 @@ def Search(query):
 
 	pagehtml = html.fromstring(searchdata.text)
 
-	for movie in pagehtml.xpath("//div[@class='post-panel']"):
-		url = movie.xpath("./div/a/@href")[0]
-		title = movie.xpath("./div[@class='inner']/h2/a/text()")[0]
-		thumb = movie.xpath("./div[@class='post-thumbnail']/a/img/@src")[0]
+	for each in pagehtml.xpath("//div[@class='imagen']"):
+		url = each.xpath("./a/@href")[0]
+		title = each.xpath("./img/@alt")[0]
+		thumb = each.xpath("./img/@src")[0]
 		if "Season" in title:
 			oc.add(DirectoryObject(
 				key = Callback(ShowEpisodes, title = title, url = url),
