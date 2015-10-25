@@ -89,7 +89,7 @@ def ShowCategory(title, category, page_count):
 	thistitle = title
 	thiscategory = category
 	oc.add(InputDirectoryObject(key = Callback(Search), title='Search', summary='Search XMovies8', prompt='Search for...'))
-	page = scraper.get(str(category) + '?page=' + str(page_count))
+	page = scraper.get(str(category) + '/page/' + str(page_count) + '/')
 	page_data = html.fromstring(page.text)
 	
 	for each in page_data.xpath("//div[@class='imagen']"):
