@@ -45,13 +45,11 @@ def MediaObjectsForURL(url):
 	]
 
 ########################################################################################
-@indirect
 def PlayVideo(url):
 
 	view_url = ""
-	#page_data = scraper.get(url)
-	page = HTML.ElementFromURL(url)
-	#page = html.fromstring(page_data.text)
+	page_data = scraper.get(url)
+	page = html.fromstring(page_data.text)
 	for each in page.xpath("//div[@class='player-content']"):
 		try:
 			view_url = view_url + "," + each.xpath("./iframe/@src")[0]
@@ -64,15 +62,24 @@ def PlayVideo(url):
 	for vurl in view_url:
 		if "vodlocker" in vurl:
 			vodlocker = scraper.get(vurl).content
-			video_url = Regex('file: "([^"]+)"').search(vodlocker).groups()[0]
-			return IndirectResponse(VideoClipObject, key=video_url)
+			try:
+				video_url = Regex('file: "([^"]+)"').search(vodlocker).groups()[0]
+				return Redirect(video_url)
+			except:
+				pass
 		if "movshare" in vurl:
-			movshare = HTML.ElementFromURL(vurl)
-			video_url = movshare.xpath('//video/source/@src')[0]
-			return IndirectResponse(VideoClipObject, key=video_url)
+			try:
+				movshare = HTML.ElementFromURL(vurl)
+				video_url = movshare.xpath('//video/source/@src')[0]
+				return Redirect(video_url)
+			except:
+				pass
 		if "realvid" in vurl:
-			realvid = scraper.get(vurl).content
-			video_url = Regex('file: "([^"]+)"').search(realvid).groups()[0]
-			return IndirectResponse(VideoClipObject, key=video_url)
+			try:
+				realvid = scraper.get(vurl).content
+				video_url = Regex('file: "([^"]+)"').search(realvid).groups()[0]
+				return Redirect(video_url)
+			except:
+				pass
 		if "google" in vurl:
 			return Redirect(vurl)
